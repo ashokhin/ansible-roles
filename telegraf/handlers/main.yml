@@ -1,0 +1,18 @@
+---
+# handlers file for telegraf
+- name: "Link new release"
+  ansible.builtin.file:
+    state: link
+    src: "{{ telegraf_releases_path }}/telegraf-{{ telegraf_version }}"
+    dest: "{{ telegraf_releases_path }}/current"
+    force: true
+  listen:
+    - "Link new release"
+  
+
+- name: "Restart Telegraf"
+  ansible.builtin.include_tasks: tasks/restart_telegraf.yml
+  listen:
+    - "Restart Telegraf"
+    - "Link new release"
+...

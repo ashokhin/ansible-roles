@@ -1,0 +1,52 @@
+---
+- name: Create temporary directory
+  ansible.builtin.tempfile:
+    path: /tmp
+    state: directory
+    suffix: telegraf
+  register: telegraf_tmp_dir
+  changed_when: false
+  delegate_to: localhost
+  run_once: true
+
+- name: "Get Telegraf archive from '{{ telegraf_url }}' into '{{ telegraf_tmp_dir.path }}'"
+  ansible.builtin.get_url:
+    url: "{{ telegraf_url }}"
+    dest: "{{ telegraf_tmp_dir.path }}/telegraf.tar.gz"
+    checksum: "{{ telegraf_archive_checksum }}"
+  changed_when: false
+  delegate_to: localhost
+  run_once: true
+  when: 
+    - "not local_install|default(false)|bool"
+
+- name: "Copy Telegraf local archive into '{{ telegraf_tmp_dir.path }}'"
+  ansible.builtin.copy:
+    src: "files/telegraf-{{ telegraf_version }}_linux_amd64.tar.gz"
+    dest: "{{ telegraf_tmp_dir.path }}/telegraf.tar.gz"
+  changed_when: false
+  delegate_to: localhost
+  run_once: true
+  when: 
+    - "local_install|default(false)|bool"
+  
+
+- name: "Unarchive Telegraf release into '{{ telegraf_tmp_dir.path }}'"
+  ansible.builtin.unarchive:
+    src: "{{ telegraf_tmp_dir.path }}/telegraf.tar.gz"
+    dest: "{{ telegraf_tmp_dir.path }}"
+  changed_when: false
+  delegate_to: localhost
+  run_once: true
+
+- name: Copy Telegraf binary on host
+  ansible.builtin.copy:
+    src: "{{ telegraf_tmp_dir.path }}/telegraf-{{ telegraf_version }}/usr/bin/telegraf"
+    dest: "{{ telegraf_releases_path }}/telegraf-{{ telegraf_version }}/telegraf"
+    owner: "{{ telegraf_owner | default(ansible_user_id) }}"
+    group: "{{ telegraf_group | default(telegraf_group_fact) }}"
+    mode: "{{ telegraf_directories_mode | default('0755') }}"
+  notify:
+    - "Link new release"
+    - "Restart Telegraf"
+...

@@ -1,0 +1,28 @@
+{% extends "telegraf_inputs.conf.j2" %}
+{% block outputs_config %}
+###############################################################################
+#                            OUTPUT PLUGINS                                   #
+###############################################################################
+
+{% for bucket in influx_buckets|default({}) %}
+[[outputs.influxdb_v2]]
+  urls = {{ influx_urls_list }}
+  bucket = "{{ bucket.name }}"
+  organization = "{{ influx_organization }}"
+  token = "{{ bucket.token }}"
+  [outputs.influxdb_v2.tagpass]
+    influxdb_database = ["{{ bucket.name }}"]
+{% if bucket.tagpass is defined and bucket.tagpass is iterable %}
+{% for plugin_tagpass in bucket.tagpass %}
+    {{ plugin_tagpass }}
+{% endfor %}
+{% endif %}
+{% if bucket.tagdrop is defined and bucket.tagdrop is iterable %}
+  [outputs.influxdb_v2.tagdrop]
+{% for plugin_tagdrop in bucket.tagdrop %}
+    {{ plugin_tagdrop }}
+{% endfor %}
+{% endif %}
+
+{% endfor %}
+{% endblock %}

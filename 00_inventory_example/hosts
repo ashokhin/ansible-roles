@@ -1,0 +1,7 @@
+[telegraf_hosts]
+hostname01
+hostname02
+hostname03
+
+[telegraf_procstat]
+hostname02

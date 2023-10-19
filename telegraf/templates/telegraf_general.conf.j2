@@ -1,0 +1,14 @@
+{% extends "telegraf.conf.j2" %}
+{% block general_config %}
+[global_tags]
+{% if telegraf_global_tags is defined and telegraf_global_tags is iterable %}
+{% for tag in telegraf_global_tags %}
+  {{ tag.tag_name }} = "{{ tag.tag_value }}"
+{% endfor %}
+{% endif %}
+
+[agent]
+{% for config_item in telegraf_default_agent_config %}
+  {{ config_item }}
+{% endfor %}
+{% endblock %}

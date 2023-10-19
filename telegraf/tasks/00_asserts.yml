@@ -1,0 +1,20 @@
+---
+- name: "Check if Telegraf '{{ telegraf_version }}' exists on '{{ telegraf_base_url }}'"
+  block:
+    - name: "Check url '{{ telegraf_url }}'"
+      ansible.builtin.uri:
+        url: "{{ telegraf_url }}"
+      register: http_response
+    
+    - name: "'{{ telegraf_url }}' HTTP response code == '200'"
+      ansible.builtin.assert:
+        that:
+          - "http_response.status == 200"
+        fail_msg: "'{{ telegraf_url }}' HTTP response code == '{{ http_response.status }}'"
+  
+  delegate_to: localhost
+  run_once: true
+  when:
+    - "not local_install|default(false)|bool"
+
+...

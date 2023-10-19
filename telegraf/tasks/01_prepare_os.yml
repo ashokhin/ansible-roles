@@ -1,0 +1,67 @@
+---
+- block:
+  - name: Get user's main group
+    ansible.builtin.command: id -g -n
+    register: telegraf_group_var
+    changed_when: false
+
+  - name: Set group fact
+    ansible.builtin.set_fact:
+      telegraf_group_fact: "{{ telegraf_group_var.stdout }}"
+  
+  when:
+    - telegraf_group is not defined
+
+#- name: Print ansible_facts
+#  debug:
+#    msg: "{{ ansible_facts }}"
+
+- name: Create Telegraf directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ telegraf_owner | default(ansible_user_id) }}"
+    group: "{{ telegraf_group | default(telegraf_group_fact) }}"
+    mode: "{{ telegraf_directories_mode | default('0755') }}"
+  loop:
+    - "{{ telegraf_releases_path }}"
+    - "{{ telegraf_conf_path }}"
+    - "{{ telegraf_logs_path }}"
+
+- name: Create Telegraf release
+  ansible.builtin.file:
+    path: "{{ telegraf_releases_path }}/telegraf-{{ telegraf_version }}"
+    state: directory
+    owner: "{{ telegraf_owner | default(ansible_user_id) }}"
+    group: "{{ telegraf_group | default(telegraf_group_fact) }}"
+    mode: "{{ telegraf_directories_mode | default('0755') }}"
+
+- ansible.builtin.stat:
+    path: "{{ telegraf_releases_path }}/current"
+  register: stat_symlink_output
+
+- ansible.builtin.stat:
+    path: "{{ telegraf_releases_path }}/telegraf-{{ telegraf_version }}"
+  register: stat_version_output
+  
+- name: "Symlink '{{ telegraf_releases_path }}/current' doesn't exist"
+  ansible.builtin.debug:
+    msg: "exists: {{ stat_symlink_output.stat.exists|bool }}"
+  changed_when: true
+  notify:
+    - "Link new release"
+  when:
+    - not stat_symlink_output.stat.exists|bool
+    - stat_version_output.stat.exists|bool
+
+- name: "Symlink '{{ telegraf_releases_path }}/current' points on another version"
+  ansible.builtin.debug:
+    msg: "{{ stat_symlink_output.stat.lnk_target }} != {{ telegraf_releases_path }}/telegraf-{{ telegraf_version }}"
+  changed_when: true
+  notify:
+    - "Link new release"
+  when:
+    - stat_symlink_output.stat.exists|bool
+    - stat_version_output.stat.exists|bool
+    - stat_symlink_output.stat.lnk_target != stat_version_output.stat.path
+...

@@ -1,0 +1,12 @@
+---
+- name: Stop Telegraf
+  ansible.builtin.command:
+    cmd: |-
+      pkill -f "telegraf --config-directory {{ telegraf_conf_path }}"
+  ignore_errors: true
+
+- name: Start Telegraf
+  ansible.builtin.shell:
+    cmd: |-
+      nohup "{{ telegraf_releases_path }}/current/telegraf" --config-directory "{{ telegraf_conf_path }}" &>/dev/null & sleep 1
+...

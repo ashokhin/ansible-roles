@@ -1,0 +1,12 @@
+---
+- name: Create Telegraf configs
+  ansible.builtin.template:
+    src: telegraf_outputs.conf.j2
+    dest: "{{ telegraf_conf_path }}/telegraf{{ item }}.conf"
+  loop:
+    - ""
+    - "_inputs"
+    - "_outputs"
+  notify:
+    - "Restart Telegraf"
+...

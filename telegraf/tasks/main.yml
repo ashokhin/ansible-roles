@@ -1,0 +1,22 @@
+---
+# tasks file for telegraf
+- name: Pre-Install checks
+  ansible.builtin.import_tasks: 00_asserts.yml
+
+- name: Prepare OS
+  ansible.builtin.import_tasks: 01_prepare_os.yml
+
+- name: Install Telegraf
+  ansible.builtin.import_tasks: 02_install.yml
+
+- name: Configure Telegraf
+  ansible.builtin.import_tasks: 03_configure.yml
+
+- name: "Delete temporary directory {{ telegraf_tmp_dir.path }}"
+  ansible.builtin.file:
+    state: absent
+    path: "{{ telegraf_tmp_dir.path }}"
+  changed_when: false
+  delegate_to: localhost
+  run_once: true
+...

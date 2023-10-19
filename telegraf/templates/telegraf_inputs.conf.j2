@@ -1,0 +1,37 @@
+{% extends "telegraf_general.conf.j2" %}
+{% block inputs_config %}
+###############################################################################
+#                            INPUT PLUGINS                                    #
+###############################################################################
+
+{% for input_plugin in telegraf_default_input_plugins|default({}) %}
+[[inputs.{{ input_plugin.type }}]]
+{% if input_plugin.config is defined and input_plugin.config is iterable %}
+{% for config_item in input_plugin.config %}
+  {{ config_item }}
+{% endfor %}
+{% endif %}
+{% if input_plugin.tags is defined and input_plugin.tags is iterable %}
+  [inputs.{{ input_plugin.type }}.tags]
+{% for plugin_tag in input_plugin.tags %}
+    {{ plugin_tag }}
+{% endfor %}
+{% endif %}
+
+{% endfor %}
+{% for input_plugin in telegraf_input_plugins|default({}) %}
+{% if input_plugin.host_group in group_names %}
+[[inputs.{{ input_plugin.type }}]]
+{% for config_item in input_plugin.config|default([]) %}
+  {{ config_item }}
+{% endfor %}
+{% if input_plugin.tags is defined and input_plugin.tags is iterable %}
+  [inputs.{{ input_plugin.type }}.tags]
+{% for plugin_tag in input_plugin.tags %}
+    {{ plugin_tag }}
+{% endfor %}
+{% endif %}
+{% endif %}
+
+{% endfor %}
+{% endblock %}

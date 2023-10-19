@@ -1,0 +1,21 @@
+local_install: false
+
+tig_environment: "dev"
+
+influx_organization: "influx_org"
+influx_urls_list:
+  - "http://influxhost01:8086"
+  - "http://influxhost02:8086"
+  - "http://influxhost03:8086"
+
+influx_buckets:
+  - name: "foo"
+    token: "foo_token_here"
+  - name: "bar"
+    token: "bar_token_here"
+
+telegraf_version: "1.28.1"
+telegraf_archive_checksum: "sha256:12bba32a6041efab0ca1b2877d943f7bf877cfd81cc295964b75f93ee455c143"
+telegraf_input_plugins:
+  - host_group: "telegraf_procstat"
+    type: "procstat"

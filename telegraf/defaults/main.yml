@@ -1,0 +1,78 @@
+---
+# defaults file for telegraf
+local_install: true
+tig_environment: "dev"
+telegraf_version: "1.28.2"
+telegraf_base_url: "https://dl.influxdata.com/telegraf/releases"
+telegraf_archive_checksum: "sha256:c0af64b11ec00b02a1200e3f56d395949713545fdeaaaadfd1cdcc056eaf524d"
+telegraf_releases_path: "/tmp/telegraf/releases"
+telegraf_conf_path: "/tmp/telegraf_conf"
+telegraf_logs_path: "/tmp/telegraf_logs"
+influx_host_metrics_db: "host_{{ tig_environment | default('dev') }}"
+
+# Telegraf global tags list
+telegraf_global_tags: []
+# Telegraf agent configuration
+telegraf_default_agent_config:
+  - interval = "10s"
+  - round_interval = true
+  - metric_batch_size = 1000
+  - metric_buffer_limit = 10000
+  - collection_jitter = "0s"
+  - collection_offset = "0s"
+  - flush_interval = "10s"
+  - flush_jitter = "0s"
+  - precision = "0s"
+  - debug = false
+  - quiet = false
+  - logtarget = "file"
+  - logfile = "{{ telegraf_logs_path }}/telegraf.log"
+  - logfile_rotation_interval = "24h"
+  - logfile_rotation_max_size = "0MB"
+  - logfile_rotation_max_archives = 7
+  - log_with_timezone = ""
+  - hostname = ""
+  - omit_hostname = false
+  - snmp_translator = "gosmi"
+  - statefile = ""
+
+telegraf_default_input_plugins:
+  - type: "cpu"
+    config:
+      - percpu = true
+      - totalcpu = true
+      - collect_cpu_time = false
+      - report_active = false
+      - core_tags = false
+    tags:
+      - influxdb_database = "{{ influx_host_metrics_db }}"
+  
+  - type: "mem"
+    tags:
+      - influxdb_database = "{{ influx_host_metrics_db }}"
+  
+  - type: "swap"
+    tags:
+      - influxdb_database = "{{ influx_host_metrics_db }}"
+  
+  - type: "disk"
+    config:
+      - ignore_fs = ["tmpfs", "devtmpfs", "devfs", "iso9660", "overlay", "aufs", "squashfs", "nfs"]
+    tags:
+      - influxdb_database = "{{ influx_host_metrics_db }}"
+  
+  - type: "diskio"
+    tags:
+      - influxdb_database = "{{ influx_host_metrics_db }}"
+  
+  - type: "kernel"
+    tags:
+      - influxdb_database = "{{ influx_host_metrics_db }}"
+
+  - type: "processes"
+    tags:
+      - influxdb_database = "{{ influx_host_metrics_db }}"
+  
+  - type: "system"
+    tags:
+      - influxdb_database = "{{ influx_host_metrics_db }}"

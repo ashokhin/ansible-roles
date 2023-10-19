@@ -1,0 +1,4 @@
+---
+# vars file for telegraf
+telegraf_archive_name: "telegraf-{{ telegraf_version }}_linux_amd64.tar.gz"
+telegraf_url: "{{ telegraf_base_url }}/{{ telegraf_archive_name }}"

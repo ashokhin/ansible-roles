@@ -1,0 +1,11 @@
+{{ ansible_managed | comment }}
+
+{% if item | length == 0 %}
+{% block general_config %}{% endblock %}
+{% endif %}
+{% if item == "_inputs" %}
+{% block inputs_config %}{% endblock %}
+{% endif %}
+{% if item == "_outputs" %}
+{% block outputs_config %}{% endblock %}
+{% endif %}

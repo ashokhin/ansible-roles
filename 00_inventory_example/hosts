@@ -1,3 +1,10 @@
+[influxdb_data]
+hostname01
+hostname02
+
+[influxdb_meta]
+hostname03
+
 [telegraf_hosts]
 hostname01
 hostname02

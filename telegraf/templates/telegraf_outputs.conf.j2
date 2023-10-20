@@ -5,6 +5,7 @@
 ###############################################################################
 
 {% for bucket in influx_buckets|default({}) %}
+{% if bucket.host_group in group_names %}
 [[outputs.influxdb_v2]]
   urls = {{ influx_urls_list }}
   bucket = "{{ bucket.name }}"
@@ -24,5 +25,6 @@
 {% endfor %}
 {% endif %}
 
+{% endif %}
 {% endfor %}
 {% endblock %}

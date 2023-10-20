@@ -1,4 +1,23 @@
 ---
+- name: Create list of InfluxDB data servers
+  ansible.builtin.set_fact:
+    influx_urls_list: >-
+      {% set influx_urls_list = [] %}
+      {% for influx_host in groups.influxdb_data %}
+        {% set influx_url = 'http://'+influx_host+':'+influx_port %}
+        {% set influx_urls_list = influx_urls_list.append(influx_url) %}
+      {% endfor %}
+      {{ influx_urls_list }}
+  when:
+    - influx_urls_list is not defined
+    - groups.influxdb_data is defined
+
+- name: Check influx_urls_list variable
+  ansible.builtin.assert:
+    that:
+      - "influx_urls_list is defined"
+      - "influx_urls_list|length > 0"
+
 - name: "Check if Telegraf '{{ telegraf_version }}' exists on '{{ telegraf_base_url }}'"
   block:
     - name: "Check url '{{ telegraf_url }}'"
@@ -16,5 +35,4 @@
   run_once: true
   when:
     - "not local_install|default(false)|bool"
-
 ...

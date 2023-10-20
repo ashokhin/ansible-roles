@@ -10,8 +10,10 @@ influx_urls_list:
 
 influx_buckets:
   - name: "foo"
+    host_group: "telegraf_hosts"
     token: "foo_token_here"
   - name: "bar"
+    host_group: "telegraf_procstat"
     token: "bar_token_here"
 
 telegraf_version: "1.28.1"
